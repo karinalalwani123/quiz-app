@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Question {{ current }} — QuizMaster Pro{% endblock %}
+
+{% block content %}
+<div class="screen quiz-screen">
+
+  <div class="quiz-header">
+    <div class="quiz-meta">
+      <span class="badge">{{ category.icon }} {{ category.label }}</span>
+      <span class="q-counter">Q {{ current }} / {{ total }}</span>
+    </div>
+    <div class="timer-wrap">
+      <svg class="timer-ring" viewBox="0 0 44 44">
+        <circle class="ring-bg" cx="22" cy="22" r="18"/>
+        <circle class="ring-fg" id="ring-fg" cx="22" cy="22" r="18"/>
+      </svg>
+      <span id="timer-text">15</span>
+    </div>
+    <div class="score-wrap">⭐ {{ score }}</div>
+  </div>
+
+  <div class="progress-bar">
+    <div id="progress-fill" style="width: {{ progress }}%"></div>
+  </div>
+
+  <div class="question-card">
+    <p class="q-num">Question {{ current }}</p>
+    <h2>{{ question.q }}</h2>
+  </div>
+
+  <form action="/answer" method="POST" id="answer-form">
+    <input type="hidden" name="answer" id="selected-answer" value=""/>
+    <input type="hidden" name="time_taken" id="time-taken" value="15"/>
+
+    <div class="options-grid">
+      {% for i, opt in options %}
+      <button type="button" class="option-btn" data-index="{{ i }}"
+              onclick="selectAnswer({{ i }}, this)">
+        <span class="opt-label">{{ labels[i] }}</span>{{ opt }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn-next" id="btn-next" style="display:none">
+      {% if current == total %}See Results →{% else %}Next Question →{% endif %}
+    </button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let timeLeft = 15;
+  let startTime = Date.now();
+  const circumference = 113;
+  const ringFg = document.getElementById('ring-fg');
+  const timerText = document.getElementById('timer-text');
+  let answered = false;
+
+  function updateRing() {
+    const offset = circumference * (1 - timeLeft / 15);
+    ringFg.style.strokeDashoffset = offset;
+    timerText.textContent = timeLeft;
+    if (timeLeft <= 5) {
+      ringFg.style.stroke = '#f87171';
+      timerText.style.color = '#f87171';
+    } else if (timeLeft <= 10) {
+      ringFg.style.stroke = '#ffd85c';
+      timerText.style.color = '#ffd85c';
+    }
+  }
+
+  const timer = setInterval(() => {
+    timeLeft--;
+    updateRing();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      if (!answered) {
+        answered = true;
+        document.getElementById('time-taken').value = 15;
+        document.getElementById('selected-answer').value = -1;
+        document.getElementById('btn-next').style.display = 'block';
+        document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+      }
+    }
+  }, 1000);
+
+  function selectAnswer(index, btn) {
+    if (answered) return;
+    answered = true;
+    clearInterval(timer);
+
+    const elapsed = Math.round((Date.now() - startTime) / 1000);
+    document.getElementById('time-taken').value = elapsed;
+    document.getElementById('selected-answer').value = index;
+
+    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+    btn.classList.add('selected-opt');
+    document.getElementById('btn-next').style.display = 'block';
+  }
+</script>
+{% endblock %}

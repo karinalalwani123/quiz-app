@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}QuizMaster Pro — Home{% endblock %}
+
+{% block content %}
+<div class="hero-bg"></div>
+<div class="screen">
+  <div class="center-card">
+    <div class="logo">⚡</div>
+    <h1>QuizMaster<span>Pro</span></h1>
+    <p class="tagline">Test your knowledge. Beat the clock. Climb the board.</p>
+
+    <form action="/start" method="POST">
+      <p class="section-label">Choose a Category</p>
+      <div class="category-grid">
+        {% for cat in categories %}
+        <label class="cat-btn">
+          <input type="radio" name="category" value="{{ cat.id }}"
+            {% if loop.first %}checked{% endif %} hidden/>
+          <span class="cat-icon">{{ cat.icon }}</span>
+          {{ cat.label }}
+        </label>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn-primary">Start Quiz</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    const input = btn.querySelector('input');
+    if (input.checked) btn.classList.add('selected');
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+</script>
+{% endblock %}

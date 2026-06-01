@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Results — QuizMaster Pro{% endblock %}
+
+{% block content %}
+<div class="screen">
+  <div class="result-card">
+    <div class="result-emoji">{{ emoji }}</div>
+    <h2>{{ title }}</h2>
+    <p class="muted">You scored</p>
+    <div class="big-score">{{ score }}<span class="out-of">pts</span></div>
+
+    <div class="stats-row">
+      <div class="stat correct-stat"><span>{{ correct }}</span><small>Correct</small></div>
+      <div class="stat wrong-stat"><span>{{ wrong }}</span><small>Wrong</small></div>
+      <div class="stat"><span>{{ pct }}%</span><small>Accuracy</small></div>
+    </div>
+
+    <!-- Answer Review -->
+    <details class="review-section">
+      <summary>📋 Review Answers</summary>
+      <div class="review-list">
+        {% for a in answers %}
+        <div class="review-item {{ 'correct' if a.is_correct else 'wrong' }}">
+          <p class="review-q">{{ loop.index }}. {{ a.question }}</p>
+          <div class="review-opts">
+            {% for i, opt in enumerate(a.options) %}
+            <span class="review-opt
+              {% if i == a.correct %} correct-opt{% endif %}
+              {% if i == a.selected and not a.is_correct %} wrong-opt{% endif %}">
+              {{ opt }}
+              {% if i == a.correct %} ✓{% endif %}
+              {% if i == a.selected and not a.is_correct %} ✗{% endif %}
+            </span>
+            {% endfor %}
+          </div>
+          {% if a.is_correct %}<small class="pts-earned">+{{ a.points }} pts</small>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </details>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-section">
+      <h3>🏅 Session Leaderboard</h3>
+      <ol class="leaderboard-list">
+        {% for entry in leaderboard %}
+        <li {% if loop.first %}class="current-user"{% endif %}>
+          <span class="lb-rank">
+            {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+          </span>
+          <span class="lb-name">Player <small>({{ entry.category }})</small></span>
+          <span class="lb-pts">{{ entry.score }}</span>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <div class="result-actions">
+      <a href="/start" class="btn-primary" onclick="this.closest('form') || (document.querySelector('#replay-form') && document.querySelector('#replay-form').submit())">
+        Play Again
+      </a>
+      <a href="/" class="btn-outline">Home</a>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden replay form to preserve category -->
+<form id="replay-form" action="/start" method="POST" style="display:none">
+  <input type="hidden" name="category" value="{{ category.id }}"/>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelector('.btn-primary').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('replay-form').submit();
+  });
+</script>
+{% endblock %}
