@@ -65,9 +65,4 @@ http://127.0.0.1:5000
 - `redirect` + `url_for` — PRG (Post/Redirect/Get) pattern to prevent form resubmission
 - `request.form` — handles POST data from answer submissions
 
-## Internship Demo Talking Points
-- Demonstrates **MVC-like separation**: routes in app.py, data in questions.py, views in templates/
-- Uses **Flask sessions** for stateful game flow without a database
-- Implements **PRG pattern** — industry-standard pattern for form handling
-- Clean **Jinja2 template inheritance** with base.html
-- **Server-side scoring** — score calculated in Python, not manipulatable by client
+
